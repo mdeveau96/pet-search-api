@@ -30,7 +30,8 @@ export const login = async (req, res, next) => {
   const password = req.body.password;
   let loadedUser;
   try {
-    const user = await User.findById({ email: email });
+    const user = await User.findOne({ email: email });
+    console.log(user);
     loadedUser = user;
   } catch (err) {
     if (!err.statusCode) {

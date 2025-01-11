@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
+const ObjectId = mongoose.Schema.ObjectId;
 
 const UserSchema = new Schema(
   {
@@ -27,6 +28,12 @@ const UserSchema = new Schema(
       type: String,
       required: true,
     },
+    posts: [
+      {
+        type: ObjectId,
+        ref: "Post",
+      },
+    ],
   },
   { timestamps: true }
 );
