@@ -1,5 +1,6 @@
 import { Post } from "../models/post.js";
 import { User } from "../models/user.js";
+import { Reaction } from "../models/reaction.js";
 
 export const getPosts = async (req, res, next) => {
   try {
@@ -118,6 +119,23 @@ export const postLike = async (req, res, next) => {
     post.likes.pull(req.userId);
     await post.save();
     return res.status(200).json({ message: "Post liked", post: post });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const postReaction = async (req, res, next) => {
+  const postId = req.params.postId;
+  const reaction = req.body.reaction;
+  try {
+    const post = await Post.findById(postId);
+    if (!post) {
+      throwError("Could not find post", 404);
+    }
+    // post.reactions.push({ emoji: reaction, createdBy: req.userId });
+    post.reactions.push(req.userId);
+    await post.save();
+    return res.status(200).json({ message: "Reaction saved", post: post });
   } catch (err) {
     console.log(err);
   }

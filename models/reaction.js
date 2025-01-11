@@ -9,7 +9,7 @@ const ReactionSchema = new Schema(
       type: String,
       required: true,
     },
-    reactedBy: {
+    reactor: {
       type: ObjectId,
       ref: "User",
     },
