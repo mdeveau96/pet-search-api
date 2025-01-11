@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 import { User } from "../models/user.js";
 
@@ -13,6 +14,7 @@ export const signup = async (req, res, next) => {
     const user = new User({
       username: username,
       email: email,
+      name: name,
       phoneNumber: phoneNumber,
       password: hashedPassword,
     });
@@ -24,12 +26,38 @@ export const signup = async (req, res, next) => {
 };
 
 export const login = async (req, res, next) => {
-    const usernameEmail = req.body.usernameEmail;
-    const password = req.body.password;
-    try {
-        const user = await User.findById({email: usernameEmail});
-    } catch (err) {
-        
+  const email = req.body.email;
+  const password = req.body.password;
+  let loadedUser;
+  try {
+    const user = await User.findById({ email: email });
+    loadedUser = user;
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
     }
-    const isEqual = await bcrypt.compare(password)
-}
+    next(err);
+  }
+  try {
+    const isEqual = await bcrypt.compare(password, loadedUser.password);
+    if (!isEqual) {
+      const error = new Error("Invalid password");
+      err.statusCode = 401;
+      next(error);
+    }
+    const token = jwt.sign(
+      {
+        email: loadedUser.email,
+        userId: loadedUser._id.toString(),
+      },
+      "pet-search-api-secret",
+      { expiresIn: "1h" }
+    );
+    res.status(200).json({ token: token, userId: loadedUser._id.toString() });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
