@@ -29,3 +29,16 @@ export const createPost = async (req, res, next) => {
     console.log(err);
   }
 };
+
+export const updatePost = async (req, res, next) => {
+  const postId = req.params.postId;
+  const updatedTitle = req.body.title;
+  const updatedImageUrl = req.body.imageUrl;
+  const updatedContent = req.body.content;
+  try {
+    const post = await Post.findById(postId);
+  } catch (err) {
+    console.log(err);
+  }
+  
+};
