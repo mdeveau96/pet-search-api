@@ -1,6 +1,8 @@
+import { throwError } from "../utils/error.js";
 import { Post } from "../models/post.js";
 import { User } from "../models/user.js";
 import { Reaction } from "../models/reaction.js";
+import { Comment } from "../models/comment.js";
 
 export const getPosts = async (req, res, next) => {
   try {
@@ -24,6 +26,7 @@ export const createPost = async (req, res, next) => {
       imageUrl: imageUrl,
       content: content,
       creator: req.userId,
+      likes: [],
     });
     await post.save();
     const user = await User.findById(req.userId);
@@ -115,8 +118,9 @@ export const postLike = async (req, res, next) => {
     }
     if (!post.likes.includes(req.userId)) {
       post.likes.push(req.userId);
+    } else {
+      post.likes.pull(req.userId);
     }
-    post.likes.pull(req.userId);
     await post.save();
     return res.status(200).json({ message: "Post liked", post: post });
   } catch (err) {
@@ -126,14 +130,21 @@ export const postLike = async (req, res, next) => {
 
 export const postReaction = async (req, res, next) => {
   const postId = req.params.postId;
-  const reaction = req.body.reaction;
+  const emoji = req.body.emoji;
   try {
     const post = await Post.findById(postId);
     if (!post) {
       throwError("Could not find post", 404);
     }
-    // post.reactions.push({ emoji: reaction, createdBy: req.userId });
-    post.reactions.push(req.userId);
+    const reaction = new Reaction({
+      emoji: emoji,
+      reactor: req.userId,
+    });
+    if (!post.reactions.includes(req.userId)) {
+      post.reactions.push(reaction);
+    } else {
+      post.reactions.pull(reaction);
+    }
     await post.save();
     return res.status(200).json({ message: "Reaction saved", post: post });
   } catch (err) {
@@ -141,8 +152,26 @@ export const postReaction = async (req, res, next) => {
   }
 };
 
-const throwError = (message, statusCode) => {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  throw error;
+export const postComment = async (req, res, next) => {
+  const postId = req.params.postId;
+  const commentContent = req.body.comment;
+  try {
+    const post = await Post.findById(postId);
+    if (!post) {
+      throwError("Could not find post", 404);
+    }
+    const comment = new Comment({
+      content: commentContent,
+      likes: 0,
+      creator: req.userId,
+      reactions: [],
+    });
+    post.comments.push(comment);
+    await post.save();
+    return res
+      .status(200)
+      .json({ message: "Comment added to post", post: post });
+  } catch (err) {
+    console.log(err);
+  }
 };

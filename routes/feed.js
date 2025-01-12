@@ -8,6 +8,7 @@ import {
   deletePost,
   postLike,
   postReaction,
+  postComment,
 } from "../controllers/feed.js";
 
 const router = express.Router();
@@ -19,9 +20,7 @@ router.patch("/post/:postId", isAuth, updatePost);
 router.delete("/post/:postId", isAuth, deletePost);
 router.post("/post/:postId/like", isAuth, postLike);
 router.post("/post/:postId/reaction", isAuth, postReaction);
-router.delete("/post/:postId/reaction", isAuth);
-router.get("/post/:postId/comments", isAuth);
-router.post("/post/:postId/comment", isAuth);
+router.post("/post/:postId/comments", isAuth, postComment);
 router.patch("/post/:postId/comment", isAuth);
 router.delete("/post/:postId/comment", isAuth);
 
