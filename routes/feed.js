@@ -7,8 +7,10 @@ import {
   updatePost,
   deletePost,
   postLike,
-  postReaction,
+  // postReaction,
   postComment,
+  updateComment,
+  deleteComment,
 } from "../controllers/feed.js";
 
 const router = express.Router();
@@ -19,9 +21,9 @@ router.get("/post/:postId", isAuth, getPost);
 router.patch("/post/:postId", isAuth, updatePost);
 router.delete("/post/:postId", isAuth, deletePost);
 router.post("/post/:postId/like", isAuth, postLike);
-router.post("/post/:postId/reaction", isAuth, postReaction);
+// router.post("/post/:postId/reaction", isAuth, postReaction);
 router.post("/post/:postId/comments", isAuth, postComment);
-router.patch("/post/:postId/comment/:commentId", isAuth);
-router.delete("/post/:postId/comment/:commentId", isAuth);
+router.patch("/post/:postId/comment/:commentId", isAuth, updateComment);
+router.delete("/post/:postId/comment/:commentId", isAuth, deleteComment);
 
 export default router;

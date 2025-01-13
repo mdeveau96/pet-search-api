@@ -1,8 +1,5 @@
 import { throwError } from "../utils/error.js";
 import { Post } from "../models/post.js";
-import { User } from "../models/user.js";
-import { Reaction } from "../models/reaction.js";
-import { Comment } from "../models/comment.js";
 
 export const getPosts = async (req, res, next) => {
   try {
@@ -59,6 +56,7 @@ export const getPost = async (req, res, next) => {
 };
 
 export const updatePost = async (req, res, next) => {
+  const postId = req.params.postId;
   const title = req.body.title;
   const content = req.body.content;
   let imageUrl = req.body.imageUrl;
@@ -77,10 +75,7 @@ export const updatePost = async (req, res, next) => {
       throwError("Not Authorized", 403);
     }
     // TODO: Add logic to delete old image on update
-    post.title = title;
-    post.imageUrl = imageUrl;
-    post.content = content;
-    const result = await post.save();
+    const result = await post.updatePost(title, imageUrl, content);
     return res.status(200).json({ message: "Post updated", post: result });
   } catch (err) {
     console.log(err);
@@ -122,29 +117,30 @@ export const postLike = async (req, res, next) => {
   }
 };
 
-export const postReaction = async (req, res, next) => {
-  const postId = req.params.postId;
-  const emoji = req.body.emoji;
-  try {
-    const post = await Post.findById(postId);
-    if (!post) {
-      throwError("Could not find post", 404);
-    }
-    const reaction = new Reaction({
-      emoji: emoji,
-      reactor: req.userId,
-    });
-    if (!post.reactions.includes(req.userId)) {
-      post.reactions.push(reaction);
-    } else {
-      post.reactions.pull(reaction);
-    }
-    await post.save();
-    return res.status(200).json({ message: "Reaction saved", post: post });
-  } catch (err) {
-    console.log(err);
-  }
-};
+// export const postReaction = async (req, res, next) => {
+//   const postId = req.params.postId;
+//   const emoji = req.body.emoji;
+//   try {
+//     const post = await Post.findById(postId);
+//     if (!post) {
+//       throwError("Could not find post", 404);
+//     }
+//     const reaction = new Reaction({
+//       emoji: emoji,
+//       reactor: req.userId,
+//     });
+
+//     if (!post.reactions.includes(req.userId)) {
+//       post.reactions.push(reaction);
+//     } else {
+//       post.reactions.pull(reaction);
+//     }
+//     await post.save();
+//     return res.status(200).json({ message: "Reaction saved", post: post });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
 
 export const postComment = async (req, res, next) => {
   const postId = req.params.postId;
@@ -172,13 +168,30 @@ export const postComment = async (req, res, next) => {
 
 export const updateComment = async (req, res, next) => {
   const postId = req.params.postId;
-  const comment = req.params.commentId;
+  const commentId = req.params.commentId;
   const content = req.body.content;
   try {
     const post = await Post.findById(postId);
     if (!post) {
       throwError("Post not found", 404);
     }
+    await post.updateComment(commentId, content);
+    return res.status(200).json({ message: "Updated comment", post: post });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const deleteComment = async (req, res, next) => {
+  const postId = req.params.postId;
+  const commentId = req.params.commentId;
+  try {
+    const post = await Post.findById(postId);
+    if (!post) {
+      throwError("Post not found", 404);
+    }
+    await post.deleteComment(commentId);
+    return res.status(200).json({ message: "Deleted comment", post: post });
   } catch (err) {
     console.log(err);
   }
