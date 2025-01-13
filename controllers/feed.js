@@ -59,7 +59,6 @@ export const getPost = async (req, res, next) => {
 };
 
 export const updatePost = async (req, res, next) => {
-  const postId = req.params.postId;
   const title = req.body.title;
   const content = req.body.content;
   let imageUrl = req.body.imageUrl;
@@ -155,10 +154,31 @@ export const postComment = async (req, res, next) => {
     if (!post) {
       throwError("Could not find post", 404);
     }
-    await post.addComment(commentContent, req.userId);
+    const comment = new Comment({
+      content: commentContent,
+      likes: 0,
+      creator: req.userId,
+      reactions: [],
+    });
+    post.comments.push(comment);
+    await post.save();
     return res
       .status(200)
       .json({ message: "Comment added to post", post: post });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const updateComment = async (req, res, next) => {
+  const postId = req.params.postId;
+  const comment = req.params.commentId;
+  const content = req.body.content;
+  try {
+    const post = await Post.findById(postId);
+    if (!post) {
+      throwError("Post not found", 404);
+    }
   } catch (err) {
     console.log(err);
   }
