@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
+import mongoose, { connect } from "mongoose";
 
 const Schema = mongoose.Schema;
-const ObjectId = mongoose.Schema.ObjectId;
+const ObjectId = Schema.Types.ObjectId;
 
 const PostSchema = new Schema(
   {
@@ -30,18 +30,57 @@ const PostSchema = new Schema(
     },
     comments: [
       {
-        type: ObjectId,
-        ref: "Comment",
+        content: {
+          type: String,
+          required: true,
+        },
+        likes: {
+          type: Number,
+          required: true,
+        },
+        userId: {
+          type: ObjectId,
+          ref: "User",
+          required: true,
+        },
+        reactions: [
+          {
+            type: ObjectId,
+            ref: "Reaction",
+            required: true,
+          },
+        ],
       },
     ],
     reactions: [
       {
         type: ObjectId,
         ref: "Reaction",
+        required: true,
       },
     ],
   },
   { timestamps: true }
 );
+
+PostSchema.methods.like = function (userId) {
+  if (!this.likes.includes(userId)) {
+    this.likes.push(userId);
+  } else {
+    this.likes.pull(userId);
+  }
+  return this.save();
+};
+
+PostSchema.methods.addComment = function (content, userId) {
+  const newComment = {
+    content: content,
+    likes: 0,
+    userId: userId,
+    reactions: [],
+  };
+  this.comments.push(newComment);
+  return this.save();
+};
 
 export const Post = mongoose.model("Post", PostSchema);

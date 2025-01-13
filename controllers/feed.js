@@ -116,12 +116,7 @@ export const postLike = async (req, res, next) => {
     if (!post) {
       throwError("Could not find post", 404);
     }
-    if (!post.likes.includes(req.userId)) {
-      post.likes.push(req.userId);
-    } else {
-      post.likes.pull(req.userId);
-    }
-    await post.save();
+    await post.like(req.userId);
     return res.status(200).json({ message: "Post liked", post: post });
   } catch (err) {
     console.log(err);
@@ -160,14 +155,7 @@ export const postComment = async (req, res, next) => {
     if (!post) {
       throwError("Could not find post", 404);
     }
-    const comment = new Comment({
-      content: commentContent,
-      likes: 0,
-      creator: req.userId,
-      reactions: [],
-    });
-    post.comments.push(comment);
-    await post.save();
+    await post.addComment(commentContent, req.userId);
     return res
       .status(200)
       .json({ message: "Comment added to post", post: post });

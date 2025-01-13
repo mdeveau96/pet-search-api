@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
-const ObjectId = mongoose.Schema.ObjectId;
+const ObjectId = Schema.Types.ObjectId;
 
 const CommentSchema = new Schema(
   {
