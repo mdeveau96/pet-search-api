@@ -14,12 +14,26 @@ const GroupSchema = new Schema(
     },
     members: [
       {
-        type: ObjectId,
-        ref: "User",
+        user: {
+          userId: {
+            type: ObjectId,
+            ref: "User",
+            required: true,
+          },
+        },
+        role: {
+          type: String,
+          enum: ["admin", "member"],
+          required: true,
+        },
       },
     ],
   },
   { timestamps: true }
 );
+
+GroupSchema.methods.updateGroup = function (name, description) {
+  
+}
 
 export const Group = mongoose.model("Group", GroupSchema);
