@@ -38,17 +38,18 @@ GroupSchema.methods.updateGroup = function (name, description) {
   this.save();
 };
 
-GroupSchema.methods.addMember = function (user) {
-  if (!this.members.some((member) => member.userId === user.userId)) {
-    this.members.push(user.username);
-    return this.save();
-  }
-  return;
+GroupSchema.methods.addMember = function (users) {
+  users.array.forEach(user => {
+    if (!this.members.some((member) => member.user.userId.toString() === user.toString())) {
+      this.members.push({user: {userId: user}, role: "member"});
+    }
+  });
+  return this.save();
 };
 
 GroupSchema.methods.updateMember = function (user, role) {
   const memberIndex = this.members.findIndex((member) => {
-    return member.user.username.toString() === user.username.toString();
+    return member.user.userId.toString() === user._id.toString();
   });
   this.members[memberIndex].role = role;
   return this.save();
@@ -56,7 +57,7 @@ GroupSchema.methods.updateMember = function (user, role) {
 
 GroupSchema.methods.removeMember = function (user) {
   const memberIndex = this.members.findIndex((member) => {
-    return member.user.username.toString() === user.username.toString();
+    return member.user.userId.toString() === user.toString();
   });
   this.members.pull(this.members[memberIndex]);
   return this.save();

@@ -1,5 +1,6 @@
 import { throwError } from "../utils/error.js";
 import { Post } from "../models/post.js";
+import { User } from "../models/user.js";
 
 export const getPosts = async (req, res, next) => {
   try {

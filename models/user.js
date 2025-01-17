@@ -34,6 +34,12 @@ const UserSchema = new Schema(
         ref: "Post",
       },
     ],
+    memberOf: [
+      {
+        type: ObjectId,
+        ref: "Group",
+      },
+    ],
   },
   { timestamps: true }
 );
